@@ -1,6 +1,7 @@
 <?php
 
-namespace AHT\ConfigProduct\Block;
+namespace AHT\ConfigProduct\Helper;
+
 use Magento\Framework\View\Element\Template;
 
 class GetSimpleProducts extends Template

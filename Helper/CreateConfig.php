@@ -1,5 +1,5 @@
 <?php
-namespace AHT\ConfigProduct\Controller\Index;
+namespace AHT\ConfigProduct\Helper;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\View\Result\PageFactory;
@@ -7,7 +7,7 @@ use Magento\Customer\Model\SessionFactory;
 use AHT\ConfigProduct\Helper\GetSimpleProducts;
 use AHT\ConfigProduct\Helper\ExportFile;
 
-class Index extends \Magento\Framework\App\Action\Action
+class CreateConfig extends \Magento\Framework\App\Action\Action
 {
 	protected $resultPageFactory;
 
@@ -15,26 +15,45 @@ class Index extends \Magento\Framework\App\Action\Action
 
 	protected $exportFile;
 
+	protected $fileFactory;
+
+    protected $csvProcessor;
+
+    protected $directoryList;
+
+    protected $_productCollectionFactory;
+
 	public function __construct(
 		\Magento\Framework\App\Action\Context $context,
 		\Magento\Framework\View\Result\PageFactory $resultPageFactory,
 		GetSimpleProducts $getSimpleProducts,
-		ExportFile $exportFile
+		ExportFile $exportFile,
+		\Magento\Framework\App\Response\Http\FileFactory $fileFactory,
+    	\Magento\Framework\File\Csv $csvProcessor,
+    	\Magento\Framework\App\Filesystem\DirectoryList $directoryList,
+    	\Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productCollectionFactory
 	) {
 		$this->resultPageFactory = $resultPageFactory;
 		parent::__construct($context);
 		$this->getSimpleProducts = $getSimpleProducts;
 		$this->exportFile = $exportFile;
+		$this->fileFactory = $fileFactory;
+        $this->csvProcessor = $csvProcessor;
+        $this->directoryList = $directoryList;
+        $this->_productCollectionFactory = $productCollectionFactory;
 	}
 
 	public function execute()
 	{
 		/*die();*/
 		$simpleProduct = $this->getSimpleProducts->getProductsColor()->getData();
-
+		/*$a = $this->exportFile;
+		$a->exportFileToCSV();*/
+		/*die();*/
+		
 		$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 		$state = $objectManager->get('Magento\Framework\App\State');
-		$state->getAreaCode();
+		$state->setAreaCode('frontend');
 		$product = $objectManager->create('Magento\Catalog\Model\Product');
 		$product->setName('Configurable Product Test'); // Set Product Name
 		$product->setTypeId('configurable'); // Set Product Type Id
@@ -78,9 +97,8 @@ class Index extends \Magento\Framework\App\Action\Action
 			$configurableProductsData = array();
 			$product->setConfigurableProductsData($configurableProductsData);
 			try {
-				/*$product->save();*/
-				$product = $this->exportFile;
-				$product->exportFileToCSV();
+				$getexportFileToCSV = $this->exportFileToCSV();
+				 /* $product->save();*/
 			} catch (Exception $ex) {
 				echo '<pre>';
 				print_r($ex->getMessage());
@@ -108,9 +126,8 @@ class Index extends \Magento\Framework\App\Action\Action
 				    $product->setAssociatedProductIds($associatedProductIds); // Setting Associated Products
 
 				    $product->setCanSaveConfigurableAttributes(true);
-				    $product = $this->exportFile;
-					$product->exportFileToCSV();
-				    $product->save();
+				    $getexportFileToCSV = $this->exportFileToCSV();
+				   /* $product->save();*/
 				}
 				
 				} catch (Exception $e) {
@@ -120,8 +137,86 @@ class Index extends \Magento\Framework\App\Action\Action
 				}
 			}			
 		}
-
+		/*$a = $this->exportFile;
+		$a->exportFileToCSV();*/
 		$resultPage = $this->resultPageFactory->create();
 		return $resultPage;
 	}
+
+	public function exportFileToCSV(){
+       $fileName = 'csv_product.csv';
+       $filePath = $this->directoryList->getPath(\Magento\Framework\App\Filesystem\DirectoryList::VAR_DIR)
+       . "/" . $fileName;
+
+     // $customer = $this->_customerSession->getCustomer();
+       $productIds = ["1","2","3","4","5","6","7"];
+       $productCollection = $this->_productCollectionFactory->create()
+       /*->addIdFilter($productIds)*/
+       ->addMinimalPrice()
+       ->addFinalPrice()
+       ->addTaxPercents()
+       ->addAttributeToSelect('*');
+
+       /*echo "<pre>";
+       print_r($productCollection->getData());
+       die();*/
+
+       $productlData = $this->getProductData($productCollection);
+
+       $this->csvProcessor
+       ->setDelimiter(';')
+       ->setEnclosure('"')
+       ->saveData(
+           $filePath,
+           $productlData
+       );
+
+
+       return $this->fileFactory->create(
+           $fileName,
+           [
+               'type' => "filename",
+               'value' => $fileName,
+               'rm' => true,
+           ],
+           \Magento\Framework\App\Filesystem\DirectoryList::VAR_DIR,
+           'application/octet-stream'
+       );
+   }
+
+   protected function getProductData( \Magento\Catalog\Model\ResourceModel\Product\Collection $productCollection)
+   {
+       $result = [];
+
+       $result[] = [
+           'entity_id',
+           'name',
+           'image',
+           'sku',
+           'price',
+           'is_salable',
+           'description'
+       ];
+       foreach ($productCollection as $value) {
+
+           $result[] = [
+           $value->getEntity_id(),
+           $value->getName(),
+           $value->getImage(),
+           $value->getSku(),
+           $value->getPrice(),
+           $value->getIs_salable(),
+           $value->getDescription()
+           ];
+       }
+    /*echo '<pre>';
+    echo '<hr>';
+    foreach ($productCollection as $value) {
+     var_dump($value->getData());
+        
+    }*/
+ 
+
+       return $result;
+   }
 }
