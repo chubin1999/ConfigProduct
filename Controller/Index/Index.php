@@ -6,7 +6,7 @@ use Magento\Framework\View\Result\PageFactory;
 use Magento\Customer\Model\SessionFactory;
 use AHT\ConfigProduct\Helper\GetSimpleProducts;
 use AHT\ConfigProduct\Helper\ExportFile;
-
+use AHT\ConfigProduct\Model\Export\ProductFactory;
 class Index extends \Magento\Framework\App\Action\Action
 {
 	protected $resultPageFactory;
@@ -15,16 +15,20 @@ class Index extends \Magento\Framework\App\Action\Action
 
 	protected $exportFile;
 
+	protected $exportProductFactory;
+
 	public function __construct(
 		\Magento\Framework\App\Action\Context $context,
 		\Magento\Framework\View\Result\PageFactory $resultPageFactory,
 		GetSimpleProducts $getSimpleProducts,
-		ExportFile $exportFile
+		ExportFile $exportFile,
+		ProductFactory $exportProductFactory
 	) {
 		$this->resultPageFactory = $resultPageFactory;
 		parent::__construct($context);
 		$this->getSimpleProducts = $getSimpleProducts;
 		$this->exportFile = $exportFile;
+		$this->exportProductFactory = $exportProductFactory;
 	}
 
 	public function execute()
@@ -79,8 +83,12 @@ class Index extends \Magento\Framework\App\Action\Action
 			$product->setConfigurableProductsData($configurableProductsData);
 			try {
 				/*$product->save();*/
-				$product = $this->exportFile;
-				$product->exportFileToCSV();
+				/*$product = $this->exportFile;
+				$product->exportFileToCSV();*/
+
+				$exportProduct = $this->exportProductFactory->create();
+  				$exportProduct->exportData($product);
+
 			} catch (Exception $ex) {
 				echo '<pre>';
 				print_r($ex->getMessage());
@@ -108,9 +116,11 @@ class Index extends \Magento\Framework\App\Action\Action
 				    $product->setAssociatedProductIds($associatedProductIds); // Setting Associated Products
 
 				    $product->setCanSaveConfigurableAttributes(true);
-				    $product = $this->exportFile;
-					$product->exportFileToCSV();
-				    $product->save();
+				    /*$product = $this->exportFile;*/
+					/*$product->exportFileToCSV();*/
+				    /*$product->save();*/
+				    $exportProduct = $this->exportProductFactory->create();
+  					$exportProduct->exportData($product);
 				}
 				
 				} catch (Exception $e) {

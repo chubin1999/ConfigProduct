@@ -8,18 +8,22 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use AHT\ConfigProduct\Helper\CreateConfig;
 use AHT\ConfigProduct\Helper\ExportFile;
+use AHT\ConfigProduct\Helper\ExportFileCF;
  
 class Export extends Command
 {
     protected $createConfig;
 
     protected $exportFile;
+
+    protected $exportFileCF;
  
     const NAME_ARGUMENT = "csv_name";
 
     public function __construct(
         CreateConfig $createConfig,
-        ExportFile $exportFile
+        ExportFile $exportFile,
+        ExportFileCF $exportFileCF
     ) {
         $this->createConfig = $createConfig;
         $this->exportFile = $exportFile;
@@ -46,6 +50,6 @@ class Export extends Command
     {
         $name = $input->getArgument(self::NAME_ARGUMENT);
         $output->writeln("Exporting CSV " . $name);
-        return $this->createConfig->exportFileToCSV();
+        return $this->createConfig->execute();
     }
 }

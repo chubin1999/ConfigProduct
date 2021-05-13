@@ -98,7 +98,7 @@ class CreateConfig extends \Magento\Framework\App\Action\Action
 			$product->setConfigurableProductsData($configurableProductsData);
 			try {
 				$getexportFileToCSV = $this->exportFileToCSV();
-				 /* $product->save();*/
+				/*  $product->save();*/
 			} catch (Exception $ex) {
 				echo '<pre>';
 				print_r($ex->getMessage());
@@ -127,7 +127,7 @@ class CreateConfig extends \Magento\Framework\App\Action\Action
 
 				    $product->setCanSaveConfigurableAttributes(true);
 				    $getexportFileToCSV = $this->exportFileToCSV();
-				   /* $product->save();*/
+				    /*$product->save();*/
 				}
 				
 				} catch (Exception $e) {
