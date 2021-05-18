@@ -7,6 +7,8 @@ use Magento\Customer\Model\SessionFactory;
 use AHT\ConfigProduct\Helper\GetSimpleProducts;
 use AHT\ConfigProduct\Helper\ExportFile;
 use AHT\ConfigProduct\Model\Export\ProductFactory;
+use AHT\ConfigProduct\Block\HelloWorld;
+
 class Index extends \Magento\Framework\App\Action\Action
 {
 	protected $resultPageFactory;
@@ -17,25 +19,80 @@ class Index extends \Magento\Framework\App\Action\Action
 
 	protected $exportProductFactory;
 
+	protected $getAttribute;
+
 	public function __construct(
 		\Magento\Framework\App\Action\Context $context,
 		\Magento\Framework\View\Result\PageFactory $resultPageFactory,
 		GetSimpleProducts $getSimpleProducts,
 		ExportFile $exportFile,
-		ProductFactory $exportProductFactory
+		ProductFactory $exportProductFactory,
+		HelloWorld $getAttribute
 	) {
 		$this->resultPageFactory = $resultPageFactory;
 		parent::__construct($context);
 		$this->getSimpleProducts = $getSimpleProducts;
 		$this->exportFile = $exportFile;
 		$this->exportProductFactory = $exportProductFactory;
+		$this->getAttribute = $getAttribute;
 	}
 
 	public function execute()
-	{
-		/*die();*/
-		$simpleProduct = $this->getSimpleProducts->getProductsColor()->getData();
+	{	
+		$simpleProduct = $this->getSimpleProducts->getProducts();
+		$arrayCode = [];
+		foreach ($simpleProduct as $key => $value) {
+			$arrayCode = $value['product_simple_code'];	
+		}
+		$simpleProduct = $simpleProduct->getData();
+		echo "<pre>";
+		var_dump($simpleProduct);
+		die;
+		/*echo "<pre>";
+		var_dump($simpleProduct = $simpleProduct->getData());
+		var_dump($arrayCode);
+		die;*/
+		/*$valueSimple = [];
+		foreach ($simpleProduct as $value) {
+			echo "<pre>";
+			var_dump($value['entity_id']);
+		}
+		$valueSimple = [$value['entity_id']];
+		var_dump($valueSimple);*/
+		/*
+		$valueSimple = [];
+		foreach ($simpleProduct as $value) {
+			array_push(($valueSimple), $value['entity_id']);
+		}
+		echo "<pre>";
+		var_dump([$comma_separated = implode(",", $valueSimple)]);
+		$test = explode(",",$comma_separated);
+		var_dump($test);
+		echo "<pre>";
+		var_dump($productIdHard = array(2065,2272,2273));
+		die;*/
+		/*echo "<pre>";
+		var_dump([($comma_separated)]);
+		var_dump($productIdHard);
+		die;*/
 
+		/*echo "<pre>";
+		print_r($simpleProduct);
+		die;*/
+		/*var_dump($value['product_simple_code']);*/
+		/*$product_simple_code = $product->getResource()->getAttribute('product_simple_code')->getId();
+		var_dump($product_simple_code);*/
+		/*echo "<pre>";
+		var_dump($simpleProduct->getData());
+		die();*/
+		/*print_r($simpleProduct);*/
+		/*$objectManager = \Magento\Framework\App\ObjectManager::getInstance();*/
+		/*$product = $objectManager->get('Magento\Catalog\Model\Product')->load(1);
+		echo $product->getMetalPads();*/
+		/*$color_attr_name = $product->getResource()->getAttribute('color')->getName();*/
+		/*echo $color_attr_name;*/
+		$attributeOne = 'color';
+		$attributeTwo = 'size';
 		$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 		$state = $objectManager->get('Magento\Framework\App\State');
 		$state->getAreaCode();
@@ -43,7 +100,7 @@ class Index extends \Magento\Framework\App\Action\Action
 		$product->setName('Configurable Product Test'); // Set Product Name
 		$product->setTypeId('configurable'); // Set Product Type Id
 		$product->setAttributeSetId(4); // Set Attribute Set ID
-		$product->setSku('color'); // Set SKU
+		$product->setSku($arrayCode); // Set SKU
 		$product->setStatus(1); // Set Status
 		$product->setWeight(5); // Set Weight
 		$product->setTaxClassId(2); // Set Tax Class Id
@@ -68,14 +125,21 @@ class Index extends \Magento\Framework\App\Action\Action
 		// super attribute 
 		/*$size_attr_id = $configurable_product->getResource()->getAttribute('product_size')->getId();*/
 		$getSkuConfig = $product->getSku();
-		$color_attr_name = $product->getResource()->getAttribute('color')->getName();
+		/*var_dump($getSkuConfig);
+		die;*/
+		/*$color_attr_name = $product->getResource()->getAttribute('color')->getName();*/
 
 		//Check Sku Config with Attribute code
-		if ($getSkuConfig == $color_attr_name) {
-			$color_attr_id = $product->getResource()->getAttribute('color')->getId();
-			/*$product_simple_code = $product->getResource()->getAttribute('product_simple_code')->getId();*/
-
-			$product->getTypeInstance()->setUsedProductAttributeIds(array($color_attr_id/*, $product_simple_code*/), $product); //attribute ID of attribute 'size_general' in my store
+		/*if ($getSkuConfig == $color_attr_name) {*/
+   			/*echo $product->getCustomAttribute('product_simple_code')->getValue();
+   			die('ád');
+   			*/
+   			$color_attr_id = $product->getResource()->getAttribute($attributeOne)->getId();
+   			$size_attr_id = $product->getResource()->getAttribute($attributeTwo)->getId();
+			$product_simple_code = $product->getResource()->getAttribute('product_simple_code')->getId();
+			/*var_dump($product_simple_code);
+			die;*/
+			$product->getTypeInstance()->setUsedProductAttributeIds(array($color_attr_id,$size_attr_id/*, $product_simple_code*/), $product); //attribute ID of attribute 'size_general' in my store
 			$configurableAttributesData = $product->getTypeInstance()->getConfigurableAttributesAsArray($product);
 			$product->setCanSaveConfigurableAttributes(true);
 			$product->setConfigurableAttributesData($configurableAttributesData);
@@ -83,11 +147,11 @@ class Index extends \Magento\Framework\App\Action\Action
 			$product->setConfigurableProductsData($configurableProductsData);
 			try {
 				/*$product->save();*/
-				/*$product = $this->exportFile;
-				$product->exportFileToCSV();*/
+				$product = $this->exportFile;
+				$product->exportFileToCSV();
 
-				$exportProduct = $this->exportProductFactory->create();
-  				$exportProduct->exportData($product);
+				/*$exportProduct = $this->exportProductFactory->create();
+  				$exportProduct->exportData($product);*/
 
 			} catch (Exception $ex) {
 				echo '<pre>';
@@ -105,10 +169,17 @@ class Index extends \Magento\Framework\App\Action\Action
 					array_push($valueSimple, $value['entity_id']);
 				}
 				$comma_separated = implode(",", $valueSimple);
+				$comma_separated = explode(",",$comma_separated);
 
 				// assign simple product ids
-				$associatedProductIds = array($comma_separated);
+				/*$associatedProductIds = array(2065,2272,2273);*/
+				/*$associatedProductIds = array($comma_separated);*/
+				$associatedProductIds = $comma_separated;
 				
+
+				/*var_dump($associatedProductIds);
+				var_dump($a);
+				die();*/
 				try{
 				//Simple product > 0 create config
 				if ($simpleProduct > 0) {
@@ -118,9 +189,9 @@ class Index extends \Magento\Framework\App\Action\Action
 				    $product->setCanSaveConfigurableAttributes(true);
 				    /*$product = $this->exportFile;*/
 					/*$product->exportFileToCSV();*/
-				    /*$product->save();*/
-				    $exportProduct = $this->exportProductFactory->create();
-  					$exportProduct->exportData($product);
+				    $product->save();
+				    /*$exportProduct = $this->exportProductFactory->create();
+  					$exportProduct->exportData($product);*/
 				}
 				
 				} catch (Exception $e) {
@@ -129,7 +200,6 @@ class Index extends \Magento\Framework\App\Action\Action
 					exit;
 				}
 			}			
-		}
 
 		$resultPage = $this->resultPageFactory->create();
 		return $resultPage;

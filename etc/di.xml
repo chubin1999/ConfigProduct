@@ -3,7 +3,7 @@
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="import" xsi:type="object">AHT\ConfigProduct\Console\Command\Export</item>
+                <item name="exportConfig" xsi:type="object">AHT\ConfigProduct\Console\Command\Export</item>
             </argument>
         </arguments>
     </type>

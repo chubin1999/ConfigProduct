@@ -60,7 +60,7 @@ class Product extends \Magento\CatalogImportExport\Model\Export\Product
         $this->_product = $product;
         $exportCSVData = [];
 
-        $fileName = $product->getSku().'.csv';
+        $fileName = 'ConfigProduct.csv';
         $filePath = $this->_directoryList->getPath(\Magento\Framework\App\Filesystem\DirectoryList::VAR_DIR)
         . "/" . $fileName;
 

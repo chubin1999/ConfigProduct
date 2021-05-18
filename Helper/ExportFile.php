@@ -43,7 +43,7 @@ class ExportFile extends \Magento\Framework\App\Action\Action
      // $customer = $this->_customerSession->getCustomer();
        $productIds = ["1","2","3","4","5","6","7"];
        $productCollection = $this->_productCollectionFactory->create()
-       /*->addIdFilter($productIds)*/
+       ->addIdFilter($productIds)
        ->addMinimalPrice()
        ->addFinalPrice()
        ->addTaxPercents()

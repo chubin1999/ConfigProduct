@@ -50,6 +50,6 @@ class Export extends Command
     {
         $name = $input->getArgument(self::NAME_ARGUMENT);
         $output->writeln("Exporting CSV " . $name);
-        return $this->createConfig->execute();
+        $exportConfig = $this->createConfig->execute();
     }
 }
